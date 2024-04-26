@@ -1,161 +1,122 @@
-// Parallel Merge Sort and Sequential Merge Sort
-
-#include <bits/stdc++.h>
-#include <stdio.h>
+#include <iostream>
 #include <omp.h>
+#include <cmath>
+#include <iomanip>
 using namespace std;
 
-void printArray(int *A, int n)
+void printArray(int a[], int n)
 {
-    cout << "\n";
-    for (int i = 0; i < n; i++)
+    for(int i=0; i<n; i++)
     {
-        cout << A[i] << " ";
+        cout<<a[i]<<" ";
     }
-    cout << "\n";
+    cout<<endl;
 }
 
-void OMPmerge(int A[], int mid, int low, int high)
+void merge(int a[], int l, int mid, int h)
 {
-    int i, j, k, B[100];
-    i = low;
-    j = mid + 1;
-    k = low;
+    int i=l, j=mid+1, k=l, b[7];
 
-    while (i <= mid && j <= high)
+    while(i<=mid && j<=h)
     {
-        if (A[i] < A[j])
+        if(a[i]<a[j])
         {
-            B[k] = A[i];
+            b[k]=a[i];
             i++;
             k++;
         }
         else
         {
-            B[k] = A[j];
+            b[k]=a[j];
             j++;
             k++;
         }
     }
-    while (i <= mid)
+
+    while(i<=mid)
     {
-        B[k] = A[i];
-        k++;
+        b[k]=a[i];
         i++;
-    }
-    while (j <= high)
-    {
-        B[k] = A[j];
         k++;
-        j++;
     }
-    for (int i = low; i <= high; i++)
+
+    while(j<=h)
     {
-        A[i] = B[i];
+        b[k]=a[j];
+        j++;
+        k++;
+    }
+
+    for(int i=l; i<h; i++)
+    {
+        a[i]=b[i];
     }
 }
 
-void merge(int A[], int mid, int low, int high)
-{
-    int i, j, k, B[100];
-    i = low;
-    j = mid + 1;
-    k = low;
-    while (i <= mid && j <= high)
-    {
-        if (A[i] < A[j])
-        {
-            B[k] = A[i];
-            i++;
-            k++;
-        }
-        else
-        {
-            B[k] = A[j];
-            j++;
-            k++;
-        }
-    }
-    while (i <= mid)
-    {
-        B[k] = A[i];
-        k++;
-        i++;
-    }
-    while (j <= high)
-    {
-        B[k] = A[j];
-        k++;
-        j++;
-    }
-    for (int i = low; i <= high; i++)
-    {
-        A[i] = B[i];
-    }
-}
-
-void mergeSort(int A[], int low, int high)
+void mergeSort(int a[],int l, int h)
 {
     int mid;
-    if (low < high)
+    if(l<h)
     {
-        mid = (low + high) / 2;
-        mergeSort(A, low, mid);
-        mergeSort(A, mid + 1, high);
-        merge(A, mid, low, high);
+        mid = (l+h)/2;
+
+        mergeSort(a, l, mid);
+        mergeSort(a, mid+1, h);
+
+        merge(a,l,mid,h);
     }
 }
 
-void OMPmergeSort(int A[], int low, int high)
+
+void parallelMergeSort(int a[],int l, int h)
 {
     int mid;
-    if (low < high)
+    if(l<h)
     {
-        mid = (low + high) / 2;
-#pragma omp task firstprivate(A, low, high)
-        OMPmergeSort(A, low, mid);
-#pragma omp task firstprivate(A, low, high)
-        OMPmergeSort(A, mid + 1, high);
-#pragma omp taskwait
-        OMPmerge(A, mid, low, high);
+        mid = (l+h)/2;
+        #pragma omp task firstprivate(a,l,h)
+        parallelMergeSort(a, l, mid);
+        #pragma omp task firstprivate(a,l,h)
+        parallelMergeSort(a, mid+1, h);
+        #pragma omp taskwait
+        merge(a,l,mid,h);
     }
 }
 
 int main()
 {
-
-    int n = 7;
-    int A[n] = {9, 1, 4, 14, 4, 15, 6};
-    int B[n] = {9, 1, 4, 14, 4, 15, 6};
-    printArray(A, n);
+    const int n=7;
+    int a[n]={5,3,7,5,2,6,9};
 
     clock_t start, end;
-    start = clock();
+    double time1, time2;
 
-    mergeSort(A, 0, 6);
-    printArray(A, n);
-    ;
-    end = clock();
+    start=clock();
+    cout<<"\nSequential Merge : ";
+    mergeSort(a,0,6);
+    printArray(a,n);
+    end=clock();
 
-    double cpu_time_used;
-    cpu_time_used = ((double)(end - start)) / double(CLOCKS_PER_SEC);
-    cout << "Regular TIME: " << fixed << cpu_time_used << setprecision(10) << " sec";
+    time1= double(end-start)/double(CLOCKS_PER_SEC);
+    cout<<"\nSequential time : "<<fixed<<setprecision(10)<<time1;
 
-    cout << "\n\n";
-
-    start = clock();
-
-#pragma omp parallel
+    start=clock();
+    cout<<"\n\nParallel Merge : ";
+    #pragma omp parallel
     {
-#pragma omp single
-        OMPmergeSort(B, 0, 6);
+        #pragma omp single
+        {
+            parallelMergeSort(a,0,6);
+        }
     }
-    printArray(B, n);
-    ;
-    end = clock();
+    printArray(a,n);
+    end=clock();
 
-    cpu_time_used = ((double)(end - start)) / double(CLOCKS_PER_SEC);
-    cout << "Parallel TIME: " << fixed << cpu_time_used << setprecision(10) << " sec";
+    time2= double(end-start)/double(CLOCKS_PER_SEC);
+    cout<<"\nParallel time : "<<fixed<<setprecision(10)<<time2;
+
+    cout<<"\n\nSpeedup : "<<time1/time2;
+
 
     return 0;
 }
