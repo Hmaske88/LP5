@@ -164,3 +164,43 @@ int main()
 
     return 0;
 }
+
+
+
+// CODE FOR USER INPUT GRAPH
+
+// #include <iostream>
+// #include <vector>
+
+// using namespace std;
+
+// int main() {
+//     // Prompt the user to enter the number of nodes in the graph
+//     int numNodes;
+//     cout << "Enter the number of nodes in the graph: ";
+//     cin >> numNodes;
+    
+//     // Initialize the graph as a vector of vectors
+//     vector<vector<int>> graph(numNodes);
+    
+//     // Prompt the user to enter the adjacency list for each node
+//     for (int i = 0; i < numNodes; ++i) {
+//         cout << "Enter the adjacency list for node " << i << " (separated by spaces, terminate with -1): ";
+//         int neighbor;
+//         while (cin >> neighbor && neighbor != -1) {
+//             graph[i].push_back(neighbor);
+//         }
+//     }
+    
+//     // Display the entered graph
+//     cout << "Entered graph:" << endl;
+//     for (int i = 0; i < numNodes; ++i) {
+//         cout << "Node " << i << ": ";
+//         for (int j = 0; j < graph[i].size(); ++j) {
+//             cout << graph[i][j] << " ";
+//         }
+//         cout << endl;
+//     }
+    
+//     return 0;
+// }
